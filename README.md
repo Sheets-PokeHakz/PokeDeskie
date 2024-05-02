@@ -9,7 +9,7 @@
 5. Has Automatic Trade Logging
 
 ## Usage
-You Can Run It And Use The Bot Privately For Your Server. This Specific Version If For [Drunms Dungen](https://discord.gg/ry52eUnd)
+You Can Run It And Use The Bot Privately For Your Server. This Specific Version If For [Drums Dungen](https://discord.gg/ry52eUnd)
 
 ### You Can Host This Bot In Python Server
 ### Modules Required :
