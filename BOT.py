@@ -211,10 +211,9 @@ async def leaderboard(ctx):
     c.execute("SELECT * FROM users ORDER BY net_total DESC")
     user_data = c.fetchall()
 
-    embed = discord.Embed(title="Gambling Leaderboard", description="Gamblers With The Highest Earnings.", color=0x2F3136)
+    embed = discord.Embed(title="Gambling Leaderboard", description="Gamblers With The Highest Earnings.", color=0xF98D2F)
 
-    positions = [":1st: 1st Place", ":2nd: 2nd Place", ":3rd: 3rd Place", ":4th: 4th Place", ":5th: 5th Place"]
-    emoji_ids = ["1236697996377325709", "1236697993973989427", "1236697991428177940", "1236697999095234600", "1236698001205100717"]
+    positions = ["<:1st:1236697996377325709> 1st Place", "<:2nd:1236697993973989427> 2nd Place", "<:3rd:1236697991428177940> 3rd Place", "<:4th:1236697999095234600> 4th Place", "<:5th:1236698001205100717> 5th Place"]
 
     for index, user in enumerate(user_data[:5]):
         user_id = user[0]
@@ -231,7 +230,7 @@ async def leaderboard(ctx):
         emoji_id = emoji_ids[index]
 
         embed.add_field(
-            name=f"{position} {emoji_id}",
+            name=f"{position}",
             value=f"<@{user_id}> {net_total} Pokécoins",
             inline=False
         )
@@ -243,7 +242,6 @@ async def leaderboard(ctx):
     embed.set_footer(text=f"You Are At {user_position} On Leaderboard", icon_url=ctx.author.avatar.url)
 
     await ctx.send(embed=embed)
-
 
 @bot.command()
 async def ping(ctx):
