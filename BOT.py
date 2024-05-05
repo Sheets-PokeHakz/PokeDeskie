@@ -203,17 +203,20 @@ async def profile(ctx):
         await ctx.send(embed=embed)
 
 
-@bot.command(aliases=["leaderboard", "lb"])
+@bot.command(aliases=["lb"])
 async def leaderboard(ctx):
     conn = sqlite3.connect("Profile.db")
     c = conn.cursor()
 
-    c.execute("SELECT * FROM users ORDER BY net_total DESC LIMIT 10")
+    c.execute("SELECT * FROM users ORDER BY net_total DESC")
     user_data = c.fetchall()
 
-    embed = discord.Embed(title="*Leaderboard*", color=0x2F3136)
+    embed = discord.Embed(title="Gambling Leaderboard", description="Gamblers With The Highest Earnings.", color=0x2F3136)
 
-    for index, user in enumerate(user_data):
+    positions = [":1st: 1st Place", ":2nd: 2nd Place", ":3rd: 3rd Place", ":4th: 4th Place", ":5th: 5th Place"]
+    emoji_ids = ["1236697996377325709", "1236697993973989427", "1236697991428177940", "1236697999095234600", "1236698001205100717"]
+
+    for index, user in enumerate(user_data[:5]):
         user_id = user[0]
         net_total = user[1]
 
@@ -224,9 +227,20 @@ async def leaderboard(ctx):
         else:
             name = user_id
 
+        position = positions[index]
+        emoji_id = emoji_ids[index]
+
         embed.add_field(
-            name=f"{index + 1}. {name}", value=f"{net_total} Coins", inline=False
+            name=f"{position} {emoji_id}",
+            value=f"<@{user_id}> {net_total} Pokécoins",
+            inline=False
         )
+
+    user_net_total = get_user_details(ctx.author.id)[1]
+    user_position = sum(1 for user in user_data if user[1] > user_net_total) + 1
+
+
+    embed.set_footer(text=f"You Are At {user_position} On Leaderboard", icon_url=ctx.author.avatar.url)
 
     await ctx.send(embed=embed)
 
