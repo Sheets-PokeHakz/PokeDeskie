@@ -24,16 +24,46 @@ keep_alive()
 
 import re
 import sys
+from flask import Flask, render_template
+from threading import Thread
+
+app = Flask(__name__)
+
+
+@app.route("/")
+def index():
+    return """<body style="margin: 0; padding: 0;">
+    <iframe width="100%" height="100%" src="https://astrumbot.vercel.app/" frameborder="0" allowfullscreen></iframe>
+  </body>"""
+
+
+def run():
+    app.run(host="0.0.0.0", port=8080)
+
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
+
+keep_alive()
+
+import re
+import sys
 import json
 import random
+import asyncio
+import sqlite3
 import asyncio
 import sqlite3
 import discord
 import datetime
 import traceback
+import traceback
 from discord.ext import commands
 
 intents = discord.Intents.all()
+bot = commands.Bot(command_prefix="+", intents=intents)
 bot = commands.Bot(command_prefix="+", intents=intents)
 
 bot.remove_command("help")
@@ -114,6 +144,10 @@ config = load_config('Config.json')
 
 @bot.event
 async def on_ready():
+    print(f"======================= ")
+    print(f"STATUS : ONLINE")
+    print(f"======================= ")
+    print(f"BOT : {bot.user}")
     print(f"======================= ")
     print(f"STATUS : ONLINE")
     print(f"======================= ")
@@ -251,6 +285,7 @@ async def ping(ctx):
     num_servers = len(bot.guilds)
 
     embed = discord.Embed(title="🏓 Pong", color=0x2F3136)
+    embed = discord.Embed(title="🏓 Pong", color=0x2F3136)
 
     embed.add_field(name="Uptime", value=uptime_str, inline=False)
     embed.add_field(name="Latency", value=f"{latency:.2f}ms", inline=False)
@@ -279,6 +314,7 @@ async def on_message(ctx):
                     if "rolls" in embed.title:
                         title_parts = embed.title.split(" ")
                         rolls_index = title_parts.index("rolls")
+                        number = title_parts[rolls_index + 1].strip("**")
                         number = title_parts[rolls_index + 1].strip("**")
                         number = number.strip("()")
                         number = int(number)
@@ -368,6 +404,35 @@ async def on_message(ctx):
                             stats = []
                             for field in embed_data[number]["fields"]:
                                 if field["name"] == "Base Stats":
+                                    hp = int(
+                                        field["value"]
+                                        .split("**HP:** ")[1]
+                                        .split("\n")[0]
+                                    )
+                                    attack = int(
+                                        field["value"]
+                                        .split("**Attack:** ")[1]
+                                        .split("\n")[0]
+                                    )
+                                    defense = int(
+                                        field["value"]
+                                        .split("**Defense:** ")[1]
+                                        .split("\n")[0]
+                                    )
+                                    sp_atk = int(
+                                        field["value"]
+                                        .split("**Sp. Atk:** ")[1]
+                                        .split("\n")[0]
+                                    )
+                                    sp_def = int(
+                                        field["value"]
+                                        .split("**Sp. Def:** ")[1]
+                                        .split("\n")[0]
+                                    )
+                                    speed = int(field["value"].split("**Speed:** ")[1])
+                                    total = (
+                                        hp + attack + defense + sp_atk + sp_def + speed
+                                    )
                                     hp = int(
                                         field["value"]
                                         .split("**HP:** ")[1]
@@ -512,7 +577,25 @@ async def on_message(ctx):
 
             trade_parts = trade_message.split(" between ")
 
+            message_link = (
+                f"https://discord.com/channels/{ctx.guild.id}/{ctx.channel.id}/{ctx.id}"
+            )
+            trade_message = ctx.embeds[0].title.split("\n")[0]
+
+            trade_parts = trade_message.split(" between ")
+
             if len(trade_parts) == 2:
+
+                data3 = ctx.embeds[0].to_dict()
+
+                if data3 is not None and "fields" in data3 and len(data3["fields"]) > 1:
+                    participant1 = data3["fields"][0]["name"][2:]
+                    participant2 = data3["fields"][1]["name"][2:]
+
+                embed_copy = ctx.embeds[0].to_dict()
+                embed_copy["fields"].append(
+                    {"name": "Message Link", "value": message_link}
+                )
 
                 data3 = ctx.embeds[0].to_dict()
 
@@ -530,15 +613,18 @@ async def on_message(ctx):
                     "participant1": participant1,
                     "participant2": participant2,
                     "message_link": message_link,
+                    "message_link": message_link,
                 }
 
                 try:
+
                     with open("Trades.json", "r") as file:
                         trades = json.load(file)
                 except json.decoder.JSONDecodeError:
                     trades = {"trades": []}
 
                 trades["trades"].append(trade_data)
+
                 with open("Trades.json", "w") as file:
                     json.dump(trades, file, indent=4)
 
@@ -833,9 +919,11 @@ async def on_message(ctx):
 
 @bot.command(aliases=["r"])
 async def roll(ctx):
+
     with open("PokeDex.json", "r") as file:
         dex_data = json.load(file)
 
+    number = random.randint(1, 1017)
     number = random.randint(1, 1017)
 
     stats = []
@@ -859,7 +947,14 @@ async def roll(ctx):
             stats.append(f"**Total:** {total}")
 
     embed = discord.Embed(title=dex_data[number]["title"], color=0x2F3136)
+    embed = discord.Embed(title=dex_data[number]["title"], color=0x2F3136)
     embed.set_thumbnail(url=dex_data[number]["image"]["url"])
+    embed.add_field(
+        name="Type", value=dex_data[number]["fields"][1]["value"], inline=False
+    )
+    embed.add_field(
+        name="Region", value=dex_data[number]["fields"][2]["value"], inline=False
+    )
     embed.add_field(
         name="Type", value=dex_data[number]["fields"][1]["value"], inline=False
     )
@@ -868,6 +963,11 @@ async def roll(ctx):
     )
     embed.add_field(name="Stats", value="\n".join(stats), inline=False)
 
+    rollemebd = discord.Embed(
+        title=f"Roll Value Is {number}",
+        description=f"Rolled By : {ctx.author.mention}\nRolled Between 1 And 1017 \n",
+        color=0x2F3136,
+    )
     rollemebd = discord.Embed(
         title=f"Roll Value Is {number}",
         description=f"Rolled By : {ctx.author.mention}\nRolled Between 1 And 1017 \n",
@@ -895,9 +995,15 @@ async def search(ctx, pokemon_query):
 
     pokemon_found = False
     for pokemon in dex_data:
+
         if pokemon_query.isdigit():
             if pokemon.get("title", "").split(" ")[0] == f"#{pokemon_query}":
                 pokemon_found = True
+
+                embed = discord.Embed(
+                    title=pokemon["title"],
+                    color=pokemon["color"],
+                )
 
                 embed = discord.Embed(
                     title=pokemon["title"],
@@ -909,9 +1015,14 @@ async def search(ctx, pokemon_query):
                         name=field["name"], value=field["value"], inline=False
                     )
 
+                    embed.add_field(
+                        name=field["name"], value=field["value"], inline=False
+                    )
+
                 embed.set_thumbnail(url=pokemon["image"]["url"])
                 await ctx.send(embed=embed)
                 break
+
 
         elif pokemon_query.lower() in pokemon.get("title", "").lower():
             pokemon_found = True
@@ -921,8 +1032,15 @@ async def search(ctx, pokemon_query):
                 color=pokemon["color"],
             )
 
+            embed = discord.Embed(
+                title=pokemon["title"],
+                color=pokemon["color"],
+            )
+
             for field in pokemon["fields"]:
                 embed.add_field(name=field["name"], value=field["value"], inline=False)
+
+            embed.set_thumbnail(url=pokemon["image"]["url"])
 
             embed.set_thumbnail(url=pokemon["image"]["url"])
             await ctx.send(embed=embed)
