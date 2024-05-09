@@ -6,8 +6,9 @@
 2. Has Automatic Dex For Carl, YAMB & PokeTwo Assistant Bot
 3. Pokemon Search Feature With Name Or With Number
 4. Profile [ Displaying User Stats ] For Gamblers
-5. Has Automatic Trade Logging
-6. Leaderboard
+5. Add And Remove Net From Users ( Admin Only )
+6. Leaderboard ( Earnings And Gamble Done)
+7. Has Automatic Trade Logging
 
 ## Usage
 You Can Run It And Use The Bot Privately For Your Server. 

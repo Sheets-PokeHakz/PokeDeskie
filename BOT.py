@@ -183,10 +183,102 @@ async def register(ctx):
 
         await ctx.send(embed=embed)
 
+@bot.command(aliases=["ap"])
+async def adminprofile(ctx, member: discord.Member = None):
+
+    if ctx.author.guild_permissions.administrator or ctx.author.id == 988118054456152084:
+
+        if member is None:
+            member = ctx.author
+
+        user_data = get_user_details(member.id)
+
+        if user_data is None:
+            embed = discord.Embed(
+                title="*Profile Not Found*",
+                description="### Please Register First",
+                color=0x2F3136,
+            )
+
+            await ctx.send(embed=embed)
+
+        else:
+
+            net_total = "{:,}".format(user_data[1]) 
+            max_gambled = "{:,}".format(user_data[2]) 
+            gamble_wins = user_data[3]
+            gamble_losses = user_data[4]
+            gamble_wins_streak = user_data[5]
+
+            if gamble_wins + gamble_losses != 0:
+                win_rate = round((gamble_wins / (gamble_wins + gamble_losses)) * 100, 2)
+            else:
+                win_rate = 0
+
+            gamble_done = gamble_wins + gamble_losses
+
+            embed = discord.Embed(
+                title=f"{member.display_name}'s **Profile**",
+                description=f"**Net Total**: {net_total} \n**Highest Gamble**: {max_gambled} \n\n**Gambles Done**: {gamble_done}\n**Wins**: {gamble_wins}\n**Losses**: {gamble_losses}\n\n**Winrate**: {win_rate} % \n**Winstreak**: {gamble_wins_streak}",
+                color=0xF98D2F,
+            )
+            
+            embed.timestamp = datetime.datetime.now()
+
+            if member.avatar is None:
+                embed.set_thumbnail(url="https://cdn.discordapp.com/embed/avatars/0.png")
+
+            else:
+                embed.set_thumbnail(url=member.avatar.url)
+
+            await ctx.send(embed=embed)
+
+@bot.command(aliases=["rnet"])
+async def removenet(ctx, member: discord.Member = None, amount: int = 0):
+
+    if ctx.author.guild_permissions.administrator or ctx.author.id == 988118054456152084:
+
+        if member is None:
+            member = ctx.author
+
+        conn = sqlite3.connect("Profile.db")
+        c = conn.cursor()
+
+        # Remove Net Balance From The User
+        c.execute("UPDATE users SET net_total = net_total - ? WHERE user_id = ?", (amount, member.id))
+        conn.commit()
+
+        await ctx.send(f"Removed {amount} Pokécoins From {member.mention}")
+
+        conn.close()
+
+    else:
+        await ctx.send("SOHAM Need To Be Crazy To Let You Do That")
+
+@bot.command(aliases=["anet"])
+async def addnet(ctx, member: discord.Member = None, amount: int = 0):
+
+    if ctx.author.guild_permissions.administrator or ctx.author.id == 988118054456152084:
+
+        if member is None:
+            member = ctx.author
+
+        conn = sqlite3.connect("Profile.db")
+        c = conn.cursor()
+
+        # Add Net Balance To The User
+        c.execute("UPDATE users SET net_total = net_total + ? WHERE user_id = ?", (amount, member.id))
+        conn.commit()
+
+        await ctx.send(f"Added {amount} Pokécoins To {member.mention}")
+
+        conn.close()
+
+    else:
+        await ctx.send("SOHAM Need To Be Crazy To Let You Do That")
 
 @bot.command(aliases=["p"])
-async def profile(ctx):
-
+async def profile(ctx, member: discord.Member = None):
     user_data = get_user_details(ctx.author.id)
 
     if user_data is None:
@@ -200,16 +292,14 @@ async def profile(ctx):
 
     else:
 
-        net_total = user_data[1]
-        max_gambled = user_data[2]
+        net_total = "{:,}".format(user_data[1]) 
+        max_gambled = "{:,}".format(user_data[2]) 
         gamble_wins = user_data[3]
         gamble_losses = user_data[4]
         gamble_wins_streak = user_data[5]
-        gamble_losses_streak = user_data[6]
 
         if gamble_wins + gamble_losses != 0:
             win_rate = round((gamble_wins / (gamble_wins + gamble_losses)) * 100, 2)
-
         else:
             win_rate = 0
 
@@ -217,10 +307,11 @@ async def profile(ctx):
 
         embed = discord.Embed(
             title=f"{ctx.author.display_name}'s **Profile**",
-            description="\u200b",
-            color=0x2F3136,
+            description=f"**Net Total**: {net_total} \n**Highest Gamble**: {max_gambled} \n\n**Gambles Done**: {gamble_done}\n**Wins**: {gamble_wins}\n**Losses**: {gamble_losses}\n\n**Winrate**: {win_rate} % \n**Winstreak**: {gamble_wins_streak}",
+            color=0xF98D2F,
         )
-        embed.add_field(name="Net Total", value=f"{net_total} Coins", inline=True)
+        
+        embed.timestamp = datetime.datetime.now()
 
         if ctx.author.avatar is None:
             embed.set_thumbnail(url="https://cdn.discordapp.com/embed/avatars/0.png")
@@ -228,36 +319,88 @@ async def profile(ctx):
         else:
             embed.set_thumbnail(url=ctx.author.avatar.url)
 
-        embed.add_field(name="Max Gambled", value=f"{max_gambled} Coins", inline=True)
-        embed.add_field(
-            name="---------------------------------------", value="\u200b", inline=False
-        )
-        embed.add_field(name="Gambles", value=gamble_done, inline=True)
-        embed.add_field(name="Wins", value=gamble_wins, inline=True)
-        embed.add_field(name="Losses", value=gamble_losses, inline=True)
-        embed.add_field(
-            name="---------------------------------------", value="\u200b", inline=False
-        )
-        embed.add_field(name="Win Rate", value=f"{win_rate} %", inline=True)
-        embed.add_field(name="Wins Streak", value=gamble_wins_streak, inline=True)
-        embed.add_field(name="Losses Streak", value=gamble_losses_streak, inline=True)
-
         await ctx.send(embed=embed)
 
 
-@bot.command(aliases=["lb"])
+@bot.command(aliases=["lbg"])
 async def leaderboard(ctx):
     conn = sqlite3.connect("Profile.db")
     c = conn.cursor()
 
-    c.execute("SELECT * FROM users ORDER BY net_total DESC LIMIT 10")
+    c.execute("SELECT * FROM users ORDER BY gamble_wins DESC")
+    user_data = c.fetchall()
+    
+    embed = discord.Embed(title="Gamble Leaderboard", description="Gamblers With The Highest Gambles.", color=0xF98D2F)
+
+    positions = ["<:1st:1236697996377325709> 1st Place", "<:2nd:1236697993973989427> 2nd Place", "<:3rd:1236697991428177940> 3rd Place", "<:4th:1236697999095234600> 4th Place", "<:5th:1236698001205100717> 5th Place"]
+
+    for index, user in enumerate(user_data[:5]):
+        user_id = user[0]
+        gamble_wins = user[3]
+        gamble_losses = user[4]
+
+        gambles = gamble_wins + gamble_losses
+
+        member = ctx.guild.get_member(int(user_id))
+
+        if member is not None:
+            name = member.display_name
+
+        else:
+            name = user_id
+
+        position = positions[index]
+
+        embed.add_field(
+            name=f"{position}",
+            value=f"<@{user_id}> {gambles} Gambles",
+            inline=False
+        )
+
+    gamble_wins = get_user_details(ctx.author.id)[3]
+    gamble_losses = get_user_details(ctx.author.id)[4]
+
+    user_gambles = gamble_wins + gamble_losses
+
+    user_position = sum(1 for user in user_data if user[3] + user[4] > user_gambles) + 1
+
+    if user_position == 1:
+        user_position = "1 st"
+    elif user_position == 2:
+        user_position = "2 nd"
+    elif user_position == 3:
+        user_position = "3 rd"
+    else:
+        user_position = f"{user_position}th"
+
+    if ctx.author.avatar is None:
+        url="https://cdn.discordapp.com/embed/avatars/0.png"
+
+    else:
+        url=ctx.author.avatar.url
+
+    embed.set_footer(text=f"You are {user_position} on leaderboard", icon_url=url)
+
+    await ctx.send(embed=embed)
+        
+
+@bot.command(aliases=["lb"])
+async def leaderboardgamble(ctx):
+    conn = sqlite3.connect("Profile.db")
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM users ORDER BY net_total DESC")
     user_data = c.fetchall()
 
-    embed = discord.Embed(title="*Leaderboard*", color=0x2F3136)
+    embed = discord.Embed(title="Gambling Leaderboard", description="Gamblers With The Highest Earnings.", color=0xF98D2F)
 
-    for index, user in enumerate(user_data):
+    positions = ["<:1st:1236697996377325709> 1st Place", "<:2nd:1236697993973989427> 2nd Place", "<:3rd:1236697991428177940> 3rd Place", "<:4th:1236697999095234600> 4th Place", "<:5th:1236698001205100717> 5th Place"]
+
+    for index, user in enumerate(user_data[:5]):
         user_id = user[0]
         net_total = user[1]
+
+        net_total = "{:,}".format(user[1])
 
         member = ctx.guild.get_member(int(user_id))
 
@@ -266,11 +409,36 @@ async def leaderboard(ctx):
         else:
             name = user_id
 
+        position = positions[index]
+
         embed.add_field(
-            name=f"{index + 1}. {name}", value=f"{net_total} Coins", inline=False
+            name=f"{position}",
+            value=f"<@{user_id}> {net_total} Pokécoins",
+            inline=False
         )
 
+    user_net_total = get_user_details(ctx.author.id)[1]
+    user_position = sum(1 for user in user_data if user[1] > user_net_total) + 1
+
+    if user_position == 1:
+        user_position = "1 st"
+    elif user_position == 2:
+        user_position = "2 nd"
+    elif user_position == 3:
+        user_position = "3 rd"
+    else:
+        user_position = f"{user_position}th"
+
+    if ctx.author.avatar is None:
+        url="https://cdn.discordapp.com/embed/avatars/0.png"
+
+    else:
+        url=ctx.author.avatar.url
+
+    embed.set_footer(text=f"You are {user_position} on leaderboard", icon_url=url)
+
     await ctx.send(embed=embed)
+
 
 
 @bot.command()
@@ -1091,6 +1259,30 @@ async def help(ctx):
     )
 
     await ctx.send(embed=embed)
+
+    if ctx.author.guild_permissions.administrator or ctx.author.id == 988118054456152084:
+        
+        aembed = discord.Embed(title="*Admin Commands*", color=0x2F3136)
+
+        aembed.add_field(
+            name="**+ap** <@User> ",
+            value="Checks Other User Profile",
+            inline=False,
+        )
+
+        aembed.add_field(
+            name="**+addnet** / **anet** <@User> <Amount>",
+            value="Adds The Specified Amount To The User's Net Total",
+            inline=False,
+        )
+
+        aembed.add_field(
+            name="**+removenet** / **rnet** <@User> <Amount>",
+            value="Removes The Specified Amount From The User's Net Total",
+            inline=False,
+        )
+
+        await ctx.send(embed=aembed)
 
 
 bot.run("BOT TOKEN")
