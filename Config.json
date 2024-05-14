@@ -1,6 +1,6 @@
 {
     "trade_log" : [],
     "rand_channels" : [],
-    "trade_Channels" : []
-
+    "trade_Channels" : [],
+    "WEBHOOK_URL" : ""
 }
