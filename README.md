@@ -9,6 +9,7 @@
 5. Add And Remove Net From Users ( Admin Only )
 6. Leaderboard ( Earnings And Gamble Done)
 7. Has Automatic Trade Logging
+8. Automatic Database Backup
 
 ## Usage
 You Can Run It And Use The Bot Privately For Your Server. 
