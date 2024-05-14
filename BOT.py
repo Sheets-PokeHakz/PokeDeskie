@@ -142,7 +142,7 @@ def get_user_details(user_id):
 
 config = load_config('Config.json')
 
-WEBHOOK_URL = ""
+WEBHOOK_URL = config["WEBHOOK_URL"]
 
 async def backup_database():
 
