@@ -142,12 +142,31 @@ def get_user_details(user_id):
 
 config = load_config('Config.json')
 
+WEBHOOK_URL = ""
+
+async def backup_database():
+
+    backup_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    webhook = DiscordWebhook(url=WEBHOOK_URL, content=f"### Backup Taken At : {backup_time}")
+    
+    conn = sqlite3.connect('Profile.db')
+    cursor = conn.cursor()
+
+    with open('Profile.db', 'rb') as f:
+        webhook.add_file(file=f.read(), filename="Profile.db")
+
+    response = webhook.execute()
+
+    cursor.close()
+    conn.close()
+
+    
+
+# Bot Event On Ready 
+
 @bot.event
 async def on_ready():
-    print(f"======================= ")
-    print(f"STATUS : ONLINE")
-    print(f"======================= ")
-    print(f"BOT : {bot.user}")
     print(f"======================= ")
     print(f"STATUS : ONLINE")
     print(f"======================= ")
@@ -155,9 +174,31 @@ async def on_ready():
 
     # await bot.change_presence(status=discord.Status.idle,activity=discord.Game(name="Maintainance"))
     await bot.change_presence(activity=discord.Game(name="PokeDex | +help"))
+    
+    await backup_database()
 
     start_time = datetime.datetime.now()
     bot.start_time = start_time
+
+# Create Automatic Backup
+
+@tasks.loop(hours=24)
+async def daily_backup():
+    if datetime.datetime.now().time().strftime('%H:%M') == '00:00':
+        await backup_database()
+
+@bot.event
+async def on_disconnect():
+    daily_backup.stop()
+
+@bot.event
+async def on_connect():
+    daily_backup.start()
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        return
 
 
 @bot.command()
