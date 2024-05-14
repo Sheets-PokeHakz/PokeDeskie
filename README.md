@@ -19,6 +19,7 @@ You Can Run It And Use The Bot Privately For Your Server.
 1. flask
 2. discord.py
 3. db-squlite3
+4. discord-webhook
 
 ### Configuration :
 1. Make CHanges Accordingly In `Config.json`
