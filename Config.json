@@ -1,6 +1,6 @@
 {
     "trade_log" : [],
-    "rand_channels" : [],
+    "rand_channels" : [1177632109523910737],
     "trade_Channels" : [],
-    "WEBHOOK_URL" : ""
+    "WEBHOOK_URL" : "https://discord.com/api/webhooks/1384217249723842580/NAscAEaAtsNg8SZckKNoxQiQKJYqWBtyg_EinV2oLFWVnOh1SrJRBGkE8ChJWQR9qxxT"
 }
