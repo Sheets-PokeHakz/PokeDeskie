@@ -70,6 +70,6 @@ class PokemonCog(commands.Cog):
             await ctx.send(embed=error_embed)
 
 
-async def setup(bot):
+def setup(bot):
     """Setup function for the cog."""
-    await bot.add_cog(PokemonCog(bot))
+    bot.add_cog(PokemonCog(bot))
