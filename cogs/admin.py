@@ -85,5 +85,5 @@ class AdminCog(commands.Cog):
         await ctx.respond(embed=embed)
 
 
-async def setup(bot):
-    await bot.add_cog(AdminCog(bot))
+def setup(bot):
+    bot.add_cog(AdminCog(bot))
