@@ -1,14 +1,9 @@
-"""
-Help command for the PokeDex Discord bot.
-"""
 import discord
-from discord.ext import commands
 from config import config
+from discord.ext import commands
 
 
 class HelpCog(commands.Cog):
-    """Help command for the bot."""
-    
     def __init__(self, bot):
         self.bot = bot
     
@@ -69,7 +64,6 @@ class HelpCog(commands.Cog):
         
         await ctx.send(embed=embed)
         
-        # Send admin commands if user is admin
         if (ctx.author.guild_permissions.administrator or 
             ctx.author.id == config.admin_user_id):
             
@@ -100,6 +94,5 @@ class HelpCog(commands.Cog):
             await ctx.send(embed=admin_embed)
 
 
-async def setup(bot):
-    """Setup function for the cog."""
-    await bot.add_cog(HelpCog(bot))
+def setup(bot):
+    bot.add_cog(HelpCog(bot))
