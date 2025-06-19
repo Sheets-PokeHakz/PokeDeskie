@@ -5,6 +5,8 @@ import datetime
 from dotenv import load_dotenv
 from discord.ext import commands
 
+from utils import log_utils
+
 load_dotenv()
 
 intents = discord.Intents.all()
@@ -45,10 +47,11 @@ async def on_ready():
 
 @bot.command(name="info")
 async def info(ctx):
-    print(f"Info : {ctx.author} : {ctx.guild.name} : {ctx.guild.id}")
+
+    log_utils.log(ctx, "info")
 
     embed = discord.Embed(
-        title=":information_source: What Even Is This ?",
+        title="What Even Is This ?",
         description=".....",
         color=0x2F3136,
     )
