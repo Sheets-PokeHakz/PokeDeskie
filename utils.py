@@ -1,6 +1,9 @@
+import os
 import json
 import discord
 import datetime
+import requests
+from dotenv import load_dotenv
 from typing import Dict, Any, List, Optional
 
 
@@ -22,13 +25,29 @@ class PokemonUtils:
             self._pokedex_data = {}
 
     def get_pokemon_by_number(self, number: int) -> Optional[Dict[str, Any]]:
-        return self._pokedex_data.get(number)
+        if isinstance(self._pokedex_data, list):
+            if 0 <= number < len(self._pokedex_data):
+                pokemon_data = self._pokedex_data[number]
+                if pokemon_data and len(pokemon_data) > 0:
+                    return pokemon_data
+                return None
+            return None
+        else:
+            return self._pokedex_data.get(number)
 
     def search_pokemon_by_name(self, name: str) -> Optional[Dict[str, Any]]:
         name_lower = name.lower()
-        for pokemon_data in self._pokedex_data.values():
-            if name_lower in pokemon_data.get("title", "").lower():
-                return pokemon_data
+
+        if isinstance(self._pokedex_data, list):
+            for pokemon_data in self._pokedex_data:
+                if pokemon_data and pokemon_data.get("title", ""):
+                    if name_lower in pokemon_data.get("title", "").lower():
+                        return pokemon_data
+        else:
+            for pokemon_data in self._pokedex_data.values():
+                if name_lower in pokemon_data.get("title", "").lower():
+                    return pokemon_data
+
         return None
 
     def get_pokemon_stats(self, pokemon_data: Dict[str, Any]) -> List[str]:
@@ -107,6 +126,46 @@ class PokemonUtils:
                 embed.add_field(name="Stats", value="\n".join(stats), inline=False)
 
         return embed
+
+    def save_pokemon_to_dex(self, pokemon_entry: Dict[str, Any]) -> bool:
+        try:
+            title = pokemon_entry.get("title", "")
+            if not title or "—" not in title:
+                print("Invalid Pokemon Entry: Missing Title Format")
+                return False
+
+            number_part = title.split("—")[0].strip().replace("#", "")
+            try:
+                pokemon_number = int(number_part)
+            except ValueError:
+                print(f"Invalid Pokemon Number: {number_part}")
+                return False
+
+            try:
+                with open(self.pokedex_file, "r") as file:
+                    pokedex_data = json.load(file)
+            except FileNotFoundError:
+                pokedex_data = []
+            except json.JSONDecodeError:
+                print(f"Invalid JSON In {self.pokedex_file}")
+                return False
+
+            while len(pokedex_data) <= pokemon_number:
+                pokedex_data.append({})
+
+            pokedex_data[pokemon_number] = pokemon_entry
+
+            with open(self.pokedex_file, "w") as file:
+                json.dump(pokedex_data, file, indent=2)
+
+            self._pokedex_data = pokedex_data
+
+            print(f"Successfully Saved Pokemon #{pokemon_number} To PokeDex")
+            return True
+
+        except Exception as e:
+            print(f"Error saving Pokemon To PokeDex: {e}")
+            return False
 
 
 class EmbedUtils:
@@ -202,6 +261,39 @@ def get_ordinal_suffix(position: int) -> str:
     return f"{position}{suffix}"
 
 
+class Logutils:
+    @staticmethod
+    def log(ctx, command) -> None:
+        print(f"Info : {ctx.author} : {command} : {ctx.guild.id}")
+
+        webhook_url = os.getenv("WEBHOOK_URL")
+
+        if webhook_url:
+
+            timestamp = int(datetime.datetime.now().timestamp())
+            embed_data = {
+                "title": "🔍 Command Execution Log",
+                "description": f"**Timestamp :** <t:{timestamp}:t>\n### Command : `{command}`\n\n\n**User :** {ctx.author.mention}\n**Guild :** {ctx.guild.name} [ {ctx.guild.id}]",
+                "color": 0x5865F2,
+                "thumbnail": {
+                    "url": (
+                        ctx.author.avatar.url
+                        if ctx.author.avatar
+                        else "https://cdn.discordapp.com/embed/avatars/0.png"
+                    )
+                },
+            }
+
+            payload = {"embeds": [embed_data]}
+
+            try:
+                requests.post(webhook_url, json=payload)
+
+            except requests.RequestException as e:
+                print(f"Failed To Send Webhook Log : {e}")
+
+
 pokemon_utils = PokemonUtils()
 embed_utils = EmbedUtils()
 trade_utils = TradeUtils()
+log_utils = Logutils()
