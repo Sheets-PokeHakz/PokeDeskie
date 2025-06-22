@@ -2,6 +2,7 @@ import os
 import asyncio
 import discord
 import datetime
+from config import config
 from dotenv import load_dotenv
 from discord.ext import commands
 
@@ -13,6 +14,7 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="+", intents=intents)
 
 bot.remove_command("help")
+
 
 @bot.event
 async def on_ready():
@@ -44,7 +46,6 @@ async def on_ready():
     print("--------------------------------")
 
 
-
 @bot.command(name="info")
 async def info(ctx):
 
@@ -60,6 +61,60 @@ async def info(ctx):
         embed.set_thumbnail(url=bot.user.avatar.url)
 
     await ctx.send(embed=embed)
+
+
+@bot.command(name="checkembed")
+async def checkembed(ctx):
+    if ctx.author.id not in config.admin_uids:
+        await ctx.send(
+            "❌ You Don't Have Permission To Use This Command.", ephemeral=True
+        )
+        return
+    
+    log_utils.log(ctx, "checkembed")
+
+    ref = ctx.message.reference
+    if ref and ref.resolved and isinstance(ref.resolved, discord.Message):
+        referenced_msg = ref.resolved
+
+        if referenced_msg.embeds:
+            for i, embed in enumerate(referenced_msg.embeds, start=1):
+                await ctx.send(f"**Embed {i} :**")
+                if embed.title:
+                    await ctx.send(f"**Title :** {embed.title}")
+                if embed.description:
+                    await ctx.send(f"**Description :** {embed.description}")
+                if embed.fields:
+                    for field in embed.fields:
+                        await ctx.send(f"**{field.name} :** {field.value}")
+        else:
+            await ctx.send("Referenced Message Has No Embeds")
+    else:
+        await ctx.send("No Valid Reference Found")
+
+
+@bot.command(name="checkmessage")
+async def checkmessage(ctx):
+    if ctx.author.id not in config.admin_uids:
+        await ctx.send(
+            "❌ You Don't Have Permission To Use This Command.", ephemeral=True
+        )
+        return
+
+    log_utils.log(ctx, "checkmessage")
+
+    ref = ctx.message.reference
+    if ref and ref.resolved and isinstance(ref.resolved, discord.Message):
+        referenced_msg = ref.resolved
+
+        content = referenced_msg.content.strip()
+        if content:
+            await ctx.send(f"📨 Message Content :\n```\n{content}\n```")
+
+        else:
+            await ctx.send("Referenced Message Has No Content")
+    else:
+        await ctx.send("No Valid Reference Found")
 
 
 bot.load_extension("cogs.admin")
