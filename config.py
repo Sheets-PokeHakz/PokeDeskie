@@ -47,6 +47,10 @@ class Config:
         return self._config_data.get("trade_channels", [])
 
     @property
+    def admin_uids(self) -> List[int]:
+        return self._config_data.get("admin_uids", [])
+
+    @property
     def webhook_url(self) -> str:
         return self._config_data.get("WEBHOOK_URL", "")
 
