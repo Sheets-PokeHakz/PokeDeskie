@@ -103,12 +103,12 @@ class AdminCog(commands.Cog):
         self.bot = bot
 
     def is_admin_or_owner(self, user):
-        return user.guild_permissions.administrator or user.id == config.admin_user_id
+        return user.id in config.admin_uids or user.id == self.bot.owner_id
 
     @commands.command(aliases=["ap"])
     async def adminprofile(self, ctx, member: discord.Member = None):
         print(f"Info : {ctx.author} : {ctx.guild.name} : {ctx.guild.id}")
-        
+
         if not self.is_admin_or_owner(ctx.author):
             await ctx.send(
                 "❌ You Don't Have Permission To Use This Command.", ephemeral=True
@@ -252,8 +252,7 @@ class AdminCog(commands.Cog):
         else:
             final_embed = embed_utils.create_error_embed(
                 "PokeDex Update Failed",
-                f"> Skipped: {skipped_updates}\n"
-                f"> Failed: {failed_updates}",
+                f"> Skipped: {skipped_updates}\n" f"> Failed: {failed_updates}",
             )
 
         await status_message.edit(embed=final_embed)
