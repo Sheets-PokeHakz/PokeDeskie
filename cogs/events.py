@@ -152,7 +152,7 @@ class EventCog(commands.Cog):
             embed = message.embeds[0]
             title = embed.title or "No Title"
 
-            if "Completed Trade " in title:
+            if "Completed trade between " in title:
                 await self._process_trade_data(message, embed)
 
         except Exception as e:
