@@ -7,8 +7,6 @@ from database import database
 from discord.ext import commands, tasks
 from utils import pokemon_utils, trade_utils
 
-from utils import log_utils
-
 
 class EventCog(commands.Cog):
     def __init__(self, bot):
@@ -68,7 +66,7 @@ class EventCog(commands.Cog):
 
                     print(f"Extracted Number: {number}")
 
-                    if 1 <= number <= 1017:
+                    if 1 <= number <= 1025:
                         pokemon_data = pokemon_utils.get_pokemon_by_number(number)
                         if pokemon_data:
                             pokemon_embed = pokemon_utils.create_pokemon_embed(
@@ -95,7 +93,7 @@ class EventCog(commands.Cog):
 
                     print(f"Extracted Number: {number}")
 
-                    if 1 <= number <= 1017:
+                    if 1 <= number <= 1025:
                         pokemon_data = pokemon_utils.get_pokemon_by_number(number)
                         if pokemon_data:
                             pokemon_embed = pokemon_utils.create_pokemon_embed(
@@ -130,7 +128,7 @@ class EventCog(commands.Cog):
                 number = int(match.group(1))
                 print(f"🎲 Extracted Number: {number}")
 
-                if 1 <= number <= 1017:
+                if 1 <= number <= 1025:
                     pokemon_data = pokemon_utils.get_pokemon_by_number(number)
                     if pokemon_data:
                         pokemon_embed = pokemon_utils.create_pokemon_embed(pokemon_data)
