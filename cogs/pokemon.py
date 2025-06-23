@@ -4,18 +4,20 @@ from config import config
 from discord.ext import commands
 from utils import pokemon_utils, embed_utils
 
-
+from utils import log_utils
 class PokemonCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(aliases=["r"])
     async def roll(self, ctx):
-        number = random.randint(1, 1017)
+        log_utils.log(ctx, "roll")
+
+        number = random.randint(1, 1025)
 
         roll_embed = embed_utils.create_info_embed(
             f"Roll Value Is {number}",
-            f"Rolled by: {ctx.author.mention}\nRolled Between 1 And 1017",
+            f"Rolled by: {ctx.author.mention}\nRolled Between 1 And 1025",
             color=0x2F3136,
         )
         await ctx.send(embed=roll_embed)
@@ -33,6 +35,8 @@ class PokemonCog(commands.Cog):
 
     @commands.command(aliases=["poke"])
     async def search(self, ctx, *, pokemon_query: str):
+        log_utils.log(ctx, "search")
+
         if not pokemon_query:
             await ctx.send("❌ Please Provide A Pokemon Name Or Number To Search For.")
             return
@@ -41,7 +45,7 @@ class PokemonCog(commands.Cog):
 
         if pokemon_query.isdigit():
             number = int(pokemon_query)
-            if 1 <= number <= 1017:
+            if 1 <= number <= 1025:
                 pokemon_data = pokemon_utils.get_pokemon_by_number(number)
         else:
 
