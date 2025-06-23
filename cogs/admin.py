@@ -5,6 +5,8 @@ from database import database
 from discord.ext import commands
 from utils import pokemon_utils, embed_utils
 
+from utils import log_utils
+
 
 def get_pokemon_data(dex_number):
     url = f"https://pokeapi.co/api/v2/pokemon/{dex_number}"
@@ -107,7 +109,7 @@ class AdminCog(commands.Cog):
 
     @commands.command(aliases=["ap"])
     async def adminprofile(self, ctx, member: discord.Member = None):
-        print(f"Info : {ctx.author} : {ctx.guild.name} : {ctx.guild.id}")
+        log_utils.log(ctx, "adminprofile")
 
         if not self.is_admin_or_owner(ctx.author):
             await ctx.send(
@@ -132,6 +134,8 @@ class AdminCog(commands.Cog):
 
     @commands.command(aliases=["anet"])
     async def addnet(self, ctx, member: discord.Member = None, amount: int = 0):
+        log_utils.log(ctx, "addnet")
+
         if not self.is_admin_or_owner(ctx.author):
             await ctx.send("❌ You Don't Have Permission To Use This Command.")
             return
@@ -156,6 +160,8 @@ class AdminCog(commands.Cog):
 
     @commands.command(aliases=["rnet"])
     async def removenet(self, ctx, member: discord.Member = None, amount: int = 0):
+        log_utils.log(ctx, "removenet")
+
         if not self.is_admin_or_owner(ctx.author):
             await ctx.send("❌ You Don't Have Permission To Use This Command.")
             return
@@ -181,6 +187,8 @@ class AdminCog(commands.Cog):
 
     @commands.command(aliases=["pupdate"])
     async def pokeupdate(self, ctx, start_number: int = None, end_number: int = None):
+        log_utils.log(ctx, "pokeupdate")
+
         if not self.is_admin_or_owner(ctx.author):
             await ctx.send("❌ You Don't Have Permission To Use This Command.")
             return
@@ -259,6 +267,8 @@ class AdminCog(commands.Cog):
 
     @commands.command(aliases=["padd"])
     async def pokeadd(self, ctx, message: discord.Message = None):
+        log_utils.log(ctx, "pokeadd")
+
         if not self.is_admin_or_owner(ctx.author):
             await ctx.send("❌ You Don't Have Permission To Use This Command.")
             return
