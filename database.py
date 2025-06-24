@@ -21,7 +21,8 @@ class DatabaseManager:
                     gamble_wins INTEGER DEFAULT 0,
                     gamble_losses INTEGER DEFAULT 0,
                     gamble_wins_streak INTEGER DEFAULT 0,
-                    gamble_losses_streak INTEGER DEFAULT 0
+                    gamble_losses_streak INTEGER DEFAULT 0,
+                    register_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """
             )
@@ -43,10 +44,10 @@ class DatabaseManager:
             if cursor.fetchone() is None:
                 cursor.execute(
                     """
-                    INSERT INTO users (user_id, net_total, max_gambled, gamble_wins, gamble_losses)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO users (user_id, net_total, max_gambled, gamble_wins, gamble_losses, register_date)
+                    VALUES (?, ?, ?, ?, ?, ?)
                 """,
-                    (str(user_id), 0, 0, 0, 0),
+                    (str(user_id), 0, 0, 0, 0, datetime.datetime.now()),
                 )
                 conn.commit()
                 return True
@@ -86,6 +87,22 @@ class DatabaseManager:
                 LIMIT ?
             """,
                 (limit,),
+            )
+            return cursor.fetchall()
+
+    def get_leaderboard_by_wins(self, limit: int = 10) -> List[Tuple]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM users ORDER BY gamble_wins DESC LIMIT ?", (limit,)
+            )
+            return cursor.fetchall()
+
+    def get_leaderboard_by_losses(self, limit: int = 10) -> List[Tuple]:
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM users ORDER BY gamble_losses DESC LIMIT ?", (limit,)
             )
             return cursor.fetchall()
 
