@@ -109,17 +109,6 @@ class PokemonUtils:
         if image_url:
             embed.set_thumbnail(url=image_url)
 
-        fields = pokemon_data.get("fields", [])
-        if len(fields) > 1:
-            embed.add_field(
-                name="Type", value=fields[1].get("value", "Unknown"), inline=False
-            )
-
-        if len(fields) > 2:
-            embed.add_field(
-                name="Region", value=fields[2].get("value", "Unknown"), inline=False
-            )
-
         if include_stats:
             stats = self.get_pokemon_stats(pokemon_data)
             if stats:
